@@ -16,4 +16,10 @@ CONFIG   -= app_bundle
 TEMPLATE = app
 
 
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    server.cpp \
+    serverthread.cpp
+
+HEADERS += \
+    server.h \
+    serverthread.h

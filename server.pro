@@ -18,8 +18,10 @@ TEMPLATE = app
 
 SOURCES += main.cpp \
     server.cpp \
-    serverthread.cpp
+    tcpconnection.cpp \
+    tcpthread.cpp
 
 HEADERS += \
     server.h \
-    serverthread.h
+    tcpconnection.h \
+    tcpthread.h

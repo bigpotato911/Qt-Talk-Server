@@ -1,6 +1,7 @@
 #include <QDebug>
 #include "server.h"
-#include "serverthread.h"
+#include "tcpthread.h"
+#include "tcpconnection.h"
 Server::Server() :
     QTcpServer()
 {
@@ -9,8 +10,10 @@ Server::Server() :
 void Server::incomingConnection(int descriptor)
 {
     qDebug("new connection...");
-    ServerThread *thread = new ServerThread(descriptor,this);
+    TcpThread *tcpThread = new TcpThread();
+    TcpConnection *tcpConnection = new TcpConnection(descriptor);
+    tcpConnection->moveToThread(tcpThread);
 
-    connect(thread,SIGNAL(finished()),thread,SLOT(deleteLater()));
-    thread->start();
+    connect(tcpThread,SIGNAL(finished()),tcpThread,SLOT(deleteLater()));
+    tcpThread->start();
 }

@@ -2,6 +2,7 @@
 #define TCPCONNECTION_H
 
 #include <QObject>
+
 class QTcpSocket;
 class QDataStream;
 
@@ -14,14 +15,17 @@ public:
     
 public slots:
     void processReadyRead();
+    void processUserOffline();
 
 private:
 
+
+    void processVerify(QDataStream &in);
+
+    QString m_userName;
     int m_descriptor;
     QTcpSocket *tcpSocket;
     quint16 blockSize;
-
-    void processVerify(QDataStream &in);
 
 };
 

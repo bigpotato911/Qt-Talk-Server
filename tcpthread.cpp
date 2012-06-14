@@ -1,5 +1,3 @@
-#include <QDataStream>
-#include <QDebug>
 #include "tcpthread.h"
 
 

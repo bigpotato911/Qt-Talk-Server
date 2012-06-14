@@ -6,6 +6,7 @@
 
 QT       += core
 QT       += network
+QT       += sql
 
 QT       -= gui
 
@@ -17,11 +18,19 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp \
-    server.cpp \
     tcpconnection.cpp \
-    tcpthread.cpp
+    tcpthread.cpp \
+    udpchat.cpp \
+    tcpsocketserver.cpp \
+    server.cpp \
+    userdm.cpp \
+    dbhelper.cpp
 
 HEADERS += \
-    server.h \
     tcpconnection.h \
-    tcpthread.h
+    tcpthread.h \
+    udpchat.h \
+    tcpsocketserver.h \
+    server.h \
+    userdm.h \
+    dbhelper.h

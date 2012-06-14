@@ -1,19 +1,15 @@
-#include <QDebug>
 #include "server.h"
-#include "tcpthread.h"
-#include "tcpconnection.h"
-Server::Server() :
-    QTcpServer()
+#include "udpchat.h"
+#include "tcpsocketserver.h"
+Server::Server()
 {
-}
+    TcpSocketServer *tcpSocketServer = new TcpSocketServer();
+    if(!tcpSocketServer->listen(QHostAddress::Any,9998)) {
+        qCritical("Cannot listen to port 9998");
 
-void Server::incomingConnection(int descriptor)
-{
-    qDebug("new connection...");
-    TcpThread *tcpThread = new TcpThread();
-    TcpConnection *tcpConnection = new TcpConnection(descriptor);
-    tcpConnection->moveToThread(tcpThread);
+    } else {
+        UdpChat *udpChat = new UdpChat();
+        udpChat->startWork(9999);
 
-    connect(tcpThread,SIGNAL(finished()),tcpThread,SLOT(deleteLater()));
-    tcpThread->start();
+    }
 }

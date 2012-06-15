@@ -20,16 +20,27 @@ UserDM &UserDM::getInstance()
 
 
 
-QList<QString> UserDM::getOnlineUsers()
+QList<User> UserDM::getOnlineUsers()
 {
-    QList<QString> onlineUsers;
+    QList<User> onlineUsers;
     if(DBHelper::createConnection()) {
 
         QSqlQuery query;
-        query.exec("select name from user where online = 1");
+        QString userName;
+        QString ip;
+        quint16 port;
+        query.exec("select name,ip,port from user where online = 1");
         while(query.next()) {
-            QString onlineUser = query.value(0).toString();
-            onlineUsers.push_back(onlineUser);
+
+            userName= query.value(0).toString();
+            ip = query.value(1).toString();
+            port = query.value(2).toUInt();
+
+            User user;
+            user.setName(userName);
+            user.setIp(ip);
+            user.setPort(port);
+            onlineUsers.push_back(user);
         }
         DBHelper::close();
     }
@@ -54,16 +65,16 @@ QString UserDM::getPwdFromName(QString userName)
     return password;
 }
 
-void UserDM::setUserOnline(QString userName)
+void UserDM::setUserOnline(const QString &userName,const QString &ip,quint16 port)
 {
     if(DBHelper::createConnection()) {
         QSqlQuery query;
-        query.exec("update user set online = 1 where name = '" + userName + "'");
-        DBHelper::close();
+        QString sql = "update user set online = 1,ip = '" + ip + "',port = " + QString::number(port)+" where name = '" + userName + "'";
+        query.exec(sql);
     }
 }
 
-void UserDM::setUserOffline(QString userName)
+void UserDM::setUserOffline(const QString &userName)
 {
     if(DBHelper::createConnection()) {
         QSqlQuery query;

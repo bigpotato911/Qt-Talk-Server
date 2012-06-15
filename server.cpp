@@ -1,3 +1,5 @@
+#include <QObject>
+
 #include "server.h"
 #include "udpchat.h"
 #include "tcpsocketserver.h"
@@ -9,6 +11,7 @@ Server::Server()
 
     } else {
         UdpChat *udpChat = new UdpChat();
+        QObject::connect(tcpSocketServer,SIGNAL(userOffline(QString)),udpChat,SLOT(processUserOffline(QString)));
         udpChat->startWork(9999);
 
     }

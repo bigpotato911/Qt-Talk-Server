@@ -8,7 +8,8 @@ class TcpSocketServer : public QTcpServer
     Q_OBJECT
 public:
     TcpSocketServer();
-    
+signals:
+    void userOffline(const QString &userName);
 protected:
     void incomingConnection(int descriptor);
     

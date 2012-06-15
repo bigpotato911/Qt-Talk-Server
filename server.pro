@@ -24,7 +24,8 @@ SOURCES += main.cpp \
     tcpsocketserver.cpp \
     server.cpp \
     userdm.cpp \
-    dbhelper.cpp
+    dbhelper.cpp \
+    user.cpp
 
 HEADERS += \
     tcpconnection.h \
@@ -33,4 +34,5 @@ HEADERS += \
     tcpsocketserver.h \
     server.h \
     userdm.h \
-    dbhelper.h
+    dbhelper.h \
+    user.h

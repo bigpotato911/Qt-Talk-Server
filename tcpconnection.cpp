@@ -15,6 +15,7 @@ TcpConnection::TcpConnection(int descriptor, QObject *parent) :
     blockSize = 0;
     connect(tcpSocket,SIGNAL(readyRead()),this,SLOT(processReadyRead()));
     connect(tcpSocket,SIGNAL(disconnected()),this,SLOT(processUserOffline()));
+
 }
 
 void TcpConnection::processReadyRead()
@@ -59,7 +60,6 @@ void TcpConnection::processVerify(QDataStream &in)
     if(password == pwdFromDatabase){
         m_userName = userName;
         out << quint16(0) << QString("True");
-        UserDM::setUserOnline(userName);
 
     }else {
         out << quint16(0) << QString("False");
@@ -76,5 +76,11 @@ void TcpConnection::processUserOffline()
 {
     UserDM::setUserOffline(m_userName);
     UserDM::close();
+
+    emit userOffline(m_userName);
+
 }
+
+
+
 

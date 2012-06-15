@@ -9,19 +9,24 @@ class QHostAddress;
 class UdpChat:public QObject
 {
     Q_OBJECT
-private slots:
-    void processReadyRead();
+
 public:
     UdpChat(QObject *parent = 0);
     void startWork(quint16 port);
+
+private slots:
+    void processReadyRead();
+    void processUserOffline(const QString& userName);
+
 
 private:
     QUdpSocket *udpSocket;
 
     void processDatagram(QByteArray block,QHostAddress &sender,quint16 port);
-    void processLogin(QHostAddress &sender,quint16 port);
+    void processLogin(QDataStream &in, QHostAddress &sender,quint16 port);
     void processLogout();
-    void processChat();
+    void processBroadcastMessage(QDataStream &in);
+    void sendDatagram(const QString &msgType,const QString &msg,const QString &ip,quint16 port);
 };
 
 #endif // UDPCHAT_H

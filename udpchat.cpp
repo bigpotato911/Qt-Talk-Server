@@ -1,7 +1,9 @@
 #include <QUdpSocket>
 #include <QHostAddress>
 #include <QDataStream>
+#include <QStringList>
 
+#include "user.h"
 #include "udpchat.h"
 
 UdpChat::UdpChat(QObject *parent):QObject(parent)
@@ -21,42 +23,6 @@ void UdpChat::startWork(quint16 port)
 
 }
 
-void UdpChat::processDatagram(QByteArray block, QHostAddress &sender, quint16 port)
-{
-    QDataStream in(&block,QIODevice::ReadOnly);
-    QString messageType;
-    in >> messageType;
-    if(messageType == "Login") {
-        processLogin(sender,port);
-    } else if(messageType == "Logout") {
-        processLogout();
-    } else if(messageType == "Chat") {
-        processChat();
-    }
-}
-
-void UdpChat::processLogin(QHostAddress &sender, quint16 port)
-{
-    qDebug("process login");
-    QList<QString> onlineUsers = UserDM::getOnlineUsers();
-    QByteArray block;
-    QDataStream out(&block,QIODevice::WriteOnly);
-    UserDM::close();
-    out.setVersion(QDataStream::Qt_4_7);
-
-    out << QString("ShowOnlineUsers") << onlineUsers;
-
-    udpSocket->writeDatagram(block,sender,port);
-}
-
-void UdpChat::processLogout()
-{
-}
-
-void UdpChat::processChat()
-{
-}
-
 void UdpChat::processReadyRead()
 {
 
@@ -71,3 +37,103 @@ void UdpChat::processReadyRead()
 
     }
 }
+
+
+
+void UdpChat::processDatagram(QByteArray block, QHostAddress &sender, quint16 port)
+{
+    QDataStream in(&block,QIODevice::ReadOnly);
+    QString messageType;
+    in >> messageType;
+    if(messageType == "Login") {
+        processLogin(in,sender,port);
+    } else if(messageType == "BroadcastMessage") {
+        processBroadcastMessage(in);
+    }
+}
+
+void UdpChat::processLogin(QDataStream &in,QHostAddress &sender, quint16 port)
+{
+    qDebug("process login");
+    QString loginName;
+    in >> loginName;
+    UserDM::setUserOnline(loginName,sender.toString(),port);
+    QList<User> onlineUsers = UserDM::getOnlineUsers();
+    UserDM::close();
+
+    QByteArray block;
+    QDataStream out(&block,QIODevice::WriteOnly);  
+    out.setVersion(QDataStream::Qt_4_7);
+    QStringList onlineUserNames;
+    for(int i = 0;i < onlineUsers.size();i++) {
+        User user = onlineUsers[i];
+        onlineUserNames << user.name();
+        if(user.name() != loginName) {
+            QString user_ip = user.ip();
+            quint16 user_port = user.port();
+            //sendDatagram(QString("UserLogin"),loginName,user_ip,user_port);
+            QByteArray buffer;
+            QDataStream broadcast_out(&buffer,QIODevice::WriteOnly);
+            broadcast_out.setVersion(QDataStream::Qt_4_7);
+            broadcast_out << QString("NewUserLogin") << loginName;
+            udpSocket->writeDatagram(buffer,QHostAddress(user_ip),user_port);
+        }
+    }
+    out << QString("ShowOnlineUsers") << onlineUserNames;
+    udpSocket->writeDatagram(block,sender,port);
+
+
+}
+
+void UdpChat::processBroadcastMessage(QDataStream &in)
+{
+    QString sendUserName;
+    QString time;
+    QString message;
+    in >> sendUserName >> time >> message;
+
+    QList<User> onlineUsers = UserDM::getOnlineUsers();
+    UserDM::close();
+
+    for(int i = 0;i < onlineUsers.size();i++) {
+        User user = onlineUsers[i];
+
+
+        QString user_ip = user.ip();
+        quint16 user_port = user.port();
+
+        QByteArray buffer;
+        QDataStream broadcast_out(&buffer,QIODevice::WriteOnly);
+        broadcast_out.setVersion(QDataStream::Qt_4_7);
+        broadcast_out << QString("NewBroadcaseMessage") << sendUserName << time << message;
+        udpSocket->writeDatagram(buffer,QHostAddress(user_ip),user_port);
+     }
+
+}
+
+void UdpChat::processUserOffline(const QString &userName)
+{
+    qDebug("process user offline");
+    QList<User> onlineUsers = UserDM::getOnlineUsers();
+    UserDM::close();
+
+    for(int i = 0;i < onlineUsers.size();i++) {
+        User user = onlineUsers[i];
+
+        QString user_ip = user.ip();
+        quint16 user_port = user.port();
+
+        QByteArray buffer;
+        QDataStream broadcast_out(&buffer,QIODevice::WriteOnly);
+        broadcast_out.setVersion(QDataStream::Qt_4_7);
+        broadcast_out << QString("UserOffline") << userName;
+        udpSocket->writeDatagram(buffer,QHostAddress(user_ip),user_port);
+     }
+}
+
+void UdpChat::sendDatagram(const QString &msgType, const QString &msg, const QString &ip, quint16 port)
+{
+
+}
+
+

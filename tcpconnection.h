@@ -12,13 +12,12 @@ class TcpConnection : public QObject
 public:
     explicit TcpConnection(int descriptor,QObject *parent = 0);
 
-    
+signals:
+    void userOffline(const QString &userName);
 public slots:
     void processReadyRead();
     void processUserOffline();
-
 private:
-
 
     void processVerify(QDataStream &in);
 
